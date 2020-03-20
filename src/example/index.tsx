@@ -1,41 +1,41 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom";
-import ImageUploading, { ImageListType } from "../index";
+import FileUpload, { FileListType } from "../index";
 import "./styles.css";
 
 function Example() {
   const maxNumber = 69;
   const maxMbFileSize = 5;
-  const onChange = (imageList: ImageListType) => {
+  const onChange = (fileList: FileListType) => {
     // data for submit
-    console.log(imageList);
+    console.log(fileList);
   };
   return (
     <div className="App">
-      <ImageUploading
+      <FileUpload
         onChange={onChange}
         maxNumber={maxNumber}
         multiple
         maxFileSize={maxMbFileSize}
         acceptType={["jpg", "gif", "png"]}
       >
-        {({ imageList, onImageUpload, onImageRemoveAll }) => (
+        {({ fileList, onImageUpload, onImageRemoveAll }) => (
           // write your building UI
           <div className="upload__image-wrapper">
             <button onClick={onImageUpload}>Upload images</button>&nbsp;
             <button onClick={onImageRemoveAll}>Remove all images</button>
-            {imageList.map(image => (
-              <div key={image.key} className="image-item">
-                <img src={image.dataURL} alt="" width="100" />
+            {fileList.map(file => (
+              <div key={file.key} className="image-item">
+                <img src={file.dataURL} alt="" width="100" />
                 <div className="image-item__btn-wrapper">
-                  <button onClick={image.onUpdate}>Update</button>
-                  <button onClick={image.onRemove}>Remove</button>
+                  <button onClick={file.onUpdate}>Update</button>
+                  <button onClick={file.onRemove}>Remove</button>
                 </div>
               </div>
             ))}
           </div>
         )}
-      </ImageUploading>
+      </FileUpload>
     </div>
   );
 }

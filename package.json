@@ -1,19 +1,19 @@
 {
-  "name": "react-images-uploading",
-  "version": "2.0.0",
-  "description": "A simple images uploader without UI. Building by yourself",
-  "author": "imvutoan",
+  "name": "react-all-upload",
+  "version": "1.0.0",
+  "description": "A simple file uploader without UI extending React-images-uploading by imvutoan",
+  "author": "diode",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/vutoan266/React-images-uploading"
+    "url": "https://github.com/diode/react-all-upload"
   },
-  "homepage": "https://github.com/vutoan266/React-images-uploading/blob/master/README.md",
+  "homepage": "https://github.com/diode/react-all-upload/blob/master/README.md",
   "main": "dist/index.js",
   "module": "dist/index.es.js",
   "jsnext:main": "dist/index.es.js",
   "engines": {
-    "node": ">=8",
+    "node": ">=11.0.0",
     "npm": ">=5"
   },
   "scripts": {
@@ -55,10 +55,15 @@
   "keywords": [
     "image",
     "images",
+    "video",
+    "videos",
     "upload",
     "uploader",
     "uploading",
     "react image upload",
-    "react images uploading"
+    "react video upload",
+    "react file upload",
+    "react pdf upload",
+    "thumbnails"
   ]
 }

@@ -2,7 +2,7 @@ import * as React from "react";
 import { getBase64 } from "./utils";
 
 const { useRef, useState, useEffect } = React;
-export interface ImageType {
+export interface FileType {
   dataURL: string;
   file?: File;
   key?: string;
@@ -10,12 +10,12 @@ export interface ImageType {
   onRemove?: () => void;
 }
 
-export type ImageListType = Array<ImageType>;
+export type FileListType = Array<FileType>;
 
-export interface ImageUploadingPropsType {
+export interface FileUploadingPropsType {
   children?: (props: ExportInterface) => React.ReactNode;
-  defaultValue?: ImageListType;
-  onChange?: (value: ImageListType) => void;
+  defaultValue?: FileListType;
+  onChange?: (value: FileListType) => void;
   multiple?: boolean;
   maxNumber?: number;
   acceptType?: Array<string>;
@@ -23,17 +23,31 @@ export interface ImageUploadingPropsType {
 }
 
 export interface ExportInterface {
-  imageList: ImageListType;
-  onImageUpload: () => void;
-  onImageRemoveAll: () => void;
+  fileList: FileListType;
+  onFileUpload: () => void;
+  onFileRemoveAll: () => void;
   errors: Record<string, any>;
+}
+
+const fileTypes = {
+  "png": "image/png",
+  "gif": "image/png",
+  "jpeg": "image/jpeg",
+  "jpg": "image/jpeg",
+  "bmp": "image/bmp",
+  "mp4": "video/mp4",
+  "webm": "video/webm",
+  "avi": "video/avi",
+  "doc": "application/msword",
+  "docx": "application/msword",
+  "pdf": "application/pdf",
 }
 
 const defaultErrors = {
   maxFileSize: false
 };
 
-const ImageUploading: React.FC<ImageUploadingPropsType> = ({
+const FileUploading: React.FC<FileUploadingPropsType> = ({
   multiple,
   onChange,
   maxNumber,
@@ -43,17 +57,17 @@ const ImageUploading: React.FC<ImageUploadingPropsType> = ({
   maxFileSize
 }) => {
   const inputRef = useRef<HTMLInputElement>(null);
-  const [imageList, setImageList] = useState(() => {
-    let initImageList: Array<ImageType> = [];
+  const [fileList, setFileList] = useState(() => {
+    let initFileList: Array<FileType> = [];
     if (defaultValue) {
-      initImageList = defaultValue.map((item: ImageType) => ({
+      initFileList = defaultValue.map((item: FileType) => ({
         ...item,
         key: item.dataURL,
-        onUpdate: (): void => onImageUpdate(item.dataURL),
-        onRemove: (): void => onImageRemove(item.dataURL)
+        onUpdate: (): void => onFileUpdate(item.dataURL),
+        onRemove: (): void => onFileRemove(item.dataURL)
       }));
     }
-    return initImageList;
+    return initFileList;
   });
 
   // the "id unique" of the image that need update by new image upload
@@ -61,16 +75,16 @@ const ImageUploading: React.FC<ImageUploadingPropsType> = ({
 
   const [errors, setErrors] = useState({ ...defaultErrors });
 
-  // for getting the latest imageList state
-  const imageListRef = useRef(imageList);
+  // for getting the latest fileList state
+  const fileListRef = useRef(fileList);
   useEffect(() => {
-    imageListRef.current = imageList;
-  }, [imageList]);
+    fileListRef.current = fileList;
+  }, [fileList]);
 
   // export only fields that needed for user
-  const onStandardizeDataChange = (list: ImageListType): void => {
+  const onStandardizeDataChange = (list: FileListType): void => {
     if (onChange) {
-      const sData: ImageListType = list.map(item => ({
+      const sData: FileListType = list.map(item => ({
         file: item.file,
         dataURL: item.dataURL
       }));
@@ -79,36 +93,36 @@ const ImageUploading: React.FC<ImageUploadingPropsType> = ({
   };
 
   // trigger input click
-  const onImageUpload = (): void => {
+  const onFileUpload = (): void => {
     inputRef.current && inputRef.current.click();
   };
 
   // exported function
-  const onImageRemoveAll = (): void => {
-    setImageList([]);
+  const onFileRemoveAll = (): void => {
+    setFileList([]);
     onStandardizeDataChange([]);
   };
 
-  const onImageRemove = (key: string): void => {
-    const updatedList: ImageListType = imageListRef.current.filter(
-      (item: ImageType) => item.key !== key
+  const onFileRemove = (key: string): void => {
+    const updatedList: FileListType = fileListRef.current.filter(
+      (item: FileType) => item.key !== key
     );
-    setImageList(updatedList);
+    setFileList(updatedList);
     onStandardizeDataChange(updatedList);
   };
 
   useEffect(() => {
     if (keyUpdate) {
-      onImageUpload();
+      onFileUpload();
     }
   }, [keyUpdate]);
 
-  const onImageUpdate = (key: string): void => {
+  const onFileUpdate = (key: string): void => {
     setKeyUpdate(key);
   };
 
   // read files and add some needed properties, func for update/remove actions
-  const getListFile = (files: FileList): Promise<ImageListType> => {
+  const getListFile = (files: FileList): Promise<FileListType> => {
     const promiseFiles: Array<Promise<string>> = [];
 
     for (let i = 0; i < files.length; i++) {
@@ -116,21 +130,21 @@ const ImageUploading: React.FC<ImageUploadingPropsType> = ({
     }
 
     return Promise.all(promiseFiles).then((fileListBase64: Array<string>) => {
-      const fileList: ImageListType = fileListBase64.map((base64, index) => {
+      const fileList: FileListType = fileListBase64.map((base64, index) => {
         const key = `${new Date().getTime().toString()}-${files[index].name}`;
         return {
           dataURL: base64,
           file: files[index],
           key,
-          onUpdate: (): void => onImageUpdate(key),
-          onRemove: (): void => onImageRemove(key)
+          onUpdate: (): void => onFileUpdate(key),
+          onRemove: (): void => onFileRemove(key)
         };
       });
       return fileList;
     });
   };
 
-  const validate = (fileList: ImageListType): boolean => {
+  const validate = (fileList: FileListType): boolean => {
     setErrors({ ...defaultErrors });
     if (maxFileSize) {
       for (let i = 0; i < fileList.length; i++) {
@@ -154,27 +168,27 @@ const ImageUploading: React.FC<ImageUploadingPropsType> = ({
     const { files } = e.target;
 
     if (files) {
-      const fileList = await getListFile(files);
-      if (fileList.length > 0) {
-        if (validate(fileList)) {
-          let updatedFileList: ImageListType;
+      const newFileList = await getListFile(files);
+      if (newFileList.length > 0) {
+        if (validate(newFileList)) {
+          let updatedFileList: FileListType;
           if (keyUpdate) {
-            updatedFileList = imageList.map((item: ImageType) => {
-              if (item.key === keyUpdate) return { ...fileList[0] };
+            updatedFileList = newFileList.map((item: FileType) => {
+              if (item.key === keyUpdate) return { ...newFileList[0] };
               return item;
             });
             setKeyUpdate("");
           } else {
             if (multiple) {
-              updatedFileList = [...imageList, ...fileList];
+              updatedFileList = [...fileList, ...newFileList];
               if (maxNumber && updatedFileList.length > maxNumber) {
-                updatedFileList = imageList;
+                updatedFileList = fileList;
               }
             } else {
-              updatedFileList = [fileList[0]];
+              updatedFileList = [newFileList[0]];
             }
           }
-          setImageList(updatedFileList);
+          setFileList(updatedFileList);
           onStandardizeDataChange(updatedFileList);
         } else {
         }
@@ -186,10 +200,11 @@ const ImageUploading: React.FC<ImageUploadingPropsType> = ({
 
   const acceptString =
     acceptType && acceptType.length > 0
-      ? acceptType
-          .reduce((acceptStr, item) => acceptStr.concat(`, image/${item}`), "")
-          .slice(2)
-      : "image/*";
+      ? acceptType.map((type) => {
+        let typeString = fileTypes[type] || type;
+        return typeString;
+      }).join(",")
+      : "*/*";
 
   return (
     <>
@@ -203,19 +218,19 @@ const ImageUploading: React.FC<ImageUploadingPropsType> = ({
       />
       {children &&
         children({
-          imageList,
-          onImageUpload,
-          onImageRemoveAll,
+          fileList,
+          onFileUpload,
+          onFileRemoveAll,
           errors
         })}
     </>
   );
 };
 
-ImageUploading.defaultProps = {
+FileUploading.defaultProps = {
   maxNumber: 1000,
   multiple: false,
   acceptType: []
 };
 
-export default ImageUploading;
+export default FileUploading;
