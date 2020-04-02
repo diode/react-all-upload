@@ -44,17 +44,18 @@ const fileTypes = {
 }
 
 const defaultErrors = {
-  maxFileSize: false
+  maxFileSize: false,
+  maxNumber: false
 };
 
 const FileUploading: React.FC<FileUploadingPropsType> = ({
   multiple,
   onChange,
-  maxNumber,
+  maxNumber = 5,
   children,
   defaultValue,
   acceptType,
-  maxFileSize
+  maxFileSize = 20
 }) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const [fileList, setFileList] = useState(() => {
@@ -180,9 +181,11 @@ const FileUploading: React.FC<FileUploadingPropsType> = ({
             setKeyUpdate("");
           } else {
             if (multiple) {
-              updatedFileList = [...fileList, ...newFileList];
-              if (maxNumber && updatedFileList.length > maxNumber) {
+              if(((fileList || []).length + (newFileList || []).length) > maxNumber){
                 updatedFileList = fileList;
+                setErrors({ ...errors, maxNumber: true });
+              }else{
+                updatedFileList = [...fileList, ...newFileList];
               }
             } else {
               updatedFileList = [newFileList[0]];
